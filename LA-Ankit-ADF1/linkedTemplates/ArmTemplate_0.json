@@ -1,0 +1,3041 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "LA-Ankit-ADF1"
+		},
+		"AmazonS31_secretAccessKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'secretAccessKey' of 'AmazonS31'"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureBlobStoragedynamic_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStoragedynamic'"
+		},
+		"Snowflake2_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Snowflake2'"
+		},
+		"Snowflake3_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Snowflake3'"
+		},
+		"AmazonS31_properties_typeProperties_accessKeyId": {
+			"type": "string",
+			"defaultValue": "AKIAVY7O7CXVMYE3BYBV"
+		},
+		"EventTrigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/586f6c5b-608d-4cd5-8b0c-7f9bc50cb3d3/resourceGroups/LearningAzure/providers/Microsoft.Storage/storageAccounts/47dastorage"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AmazonS31')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AmazonS3",
+				"typeProperties": {
+					"serviceUrl": "https://s3.amazonaws.com",
+					"accessKeyId": "[parameters('AmazonS31_properties_typeProperties_accessKeyId')]",
+					"secretAccessKey": {
+						"type": "SecureString",
+						"value": "[parameters('AmazonS31_secretAccessKey')]"
+					},
+					"authenticationType": "AccessKey"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStoragedynamic')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStoragedynamic_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Snowflake2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"authenticationType": "Basic",
+					"connectionString": "[parameters('Snowflake2_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Snowflake3')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"dbname": {
+						"type": "string"
+					},
+					"warehouse": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"authenticationType": "Basic",
+					"connectionString": "[parameters('Snowflake3_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EventTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/snowflake-migration/blobs/",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('EventTrigger_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SelfhostedIR')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dataset_with_parameter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStoragedynamic",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"outputFolder": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().outputFolder",
+							"type": "Expression"
+						},
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStoragedynamic')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "output.csv",
+						"folderPath": "output",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "output",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Name",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "Error",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText4')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Name",
+						"type": "String"
+					},
+					{
+						"name": "Category",
+						"type": "String"
+					},
+					{
+						"name": "Status",
+						"type": "String"
+					},
+					{
+						"name": "Error",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Emp_dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "employee_data_1.csv",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "id",
+						"type": "String"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "location",
+						"type": "String"
+					},
+					{
+						"name": "department\r",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Mesh100k_data')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "mesh_100k_loan_0713c_1689255555881.csv",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "LoanID",
+						"type": "String"
+					},
+					{
+						"name": "DataAsOf",
+						"type": "String"
+					},
+					{
+						"name": "InvestorID",
+						"type": "String"
+					},
+					{
+						"name": "InvestorName",
+						"type": "String"
+					},
+					{
+						"name": "BoardDate",
+						"type": "String"
+					},
+					{
+						"name": "LienPosition",
+						"type": "String"
+					},
+					{
+						"name": "LoanType",
+						"type": "String"
+					},
+					{
+						"name": "LoanProduct",
+						"type": "String"
+					},
+					{
+						"name": "LoanPurpose",
+						"type": "String"
+					},
+					{
+						"name": "LastStatementDate",
+						"type": "String"
+					},
+					{
+						"name": "OriginalNoteDate",
+						"type": "String"
+					},
+					{
+						"name": "FEMAaffect",
+						"type": "String"
+					},
+					{
+						"name": "CourtesyPeriod",
+						"type": "String"
+					},
+					{
+						"name": "IsAttorney",
+						"type": "String"
+					},
+					{
+						"name": "AnnualEscrowAccountStatementDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowAccountComputationDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowCancelDate",
+						"type": "String"
+					},
+					{
+						"name": "IsEscrowed",
+						"type": "String"
+					},
+					{
+						"name": "EscrowCancelNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "EvidenceOfInsDate",
+						"type": "String"
+					},
+					{
+						"name": "InitialEscrowStatementDate",
+						"type": "String"
+					},
+					{
+						"name": "OriginalEscrowNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrEscrowCancelReqDate",
+						"type": "String"
+					},
+					{
+						"name": "MBADQ",
+						"type": "String"
+					},
+					{
+						"name": "LoanSchedForSale",
+						"type": "String"
+					},
+					{
+						"name": "AdverseCreditBorrNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "AdverseCreditReportDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrErrorDocReqDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrErrorNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrErrorNoticeOnPayoff",
+						"type": "String"
+					},
+					{
+						"name": "BorrInfoReqDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrNoticeErrorDate",
+						"type": "String"
+					},
+					{
+						"name": "ErrorResExtension",
+						"type": "String"
+					},
+					{
+						"name": "ErrorResDocDate",
+						"type": "String"
+					},
+					{
+						"name": "ErrorResLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "InfoReqResponseDate",
+						"type": "String"
+					},
+					{
+						"name": "NoticeAckLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "PayoffDeliveryDate",
+						"type": "String"
+					},
+					{
+						"name": "PayoffRequestDate",
+						"type": "String"
+					},
+					{
+						"name": "ForcePlacedIns",
+						"type": "String"
+					},
+					{
+						"name": "ForcePlacedInsFeeDate",
+						"type": "String"
+					},
+					{
+						"name": "ForcePlacedInsNotice",
+						"type": "String"
+					},
+					{
+						"name": "ForcePlacedInsReminder",
+						"type": "String"
+					},
+					{
+						"name": "FPInsuranceCancelDate",
+						"type": "String"
+					},
+					{
+						"name": "Transfer404noticedate",
+						"type": "String"
+					},
+					{
+						"name": "GoodbyeLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "ServiceReleaseDate",
+						"type": "String"
+					},
+					{
+						"name": "ServiceReleaseScheduledDate",
+						"type": "String"
+					},
+					{
+						"name": "WelcomeLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "WarningStatus",
+						"type": "String"
+					},
+					{
+						"name": "DelinqStatAtBoarding",
+						"type": "String"
+					},
+					{
+						"name": "DocumentationType",
+						"type": "String"
+					},
+					{
+						"name": "LegalStatus",
+						"type": "String"
+					},
+					{
+						"name": "PrepaymentPenaltyFee",
+						"type": "String"
+					},
+					{
+						"name": "InterestMethod",
+						"type": "String"
+					},
+					{
+						"name": "LoanAPR",
+						"type": "String"
+					},
+					{
+						"name": "AdditionalDisputeInfoDate",
+						"type": "String"
+					},
+					{
+						"name": "SPOCAssgnDate",
+						"type": "String"
+					},
+					{
+						"name": "SCRAStatus",
+						"type": "String"
+					},
+					{
+						"name": "SCRAStatusRunDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrSCRANoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "EFTSchdNotDate",
+						"type": "String"
+					},
+					{
+						"name": "ETFSchedDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrFirstName",
+						"type": "String"
+					},
+					{
+						"name": "BorrLastName",
+						"type": "String"
+					},
+					{
+						"name": "MailingState",
+						"type": "String"
+					},
+					{
+						"name": "BorrCurrFICO",
+						"type": "String"
+					},
+					{
+						"name": "OrigBorrFICO",
+						"type": "String"
+					},
+					{
+						"name": "PropAddress1",
+						"type": "String"
+					},
+					{
+						"name": "PropAddress2",
+						"type": "String"
+					},
+					{
+						"name": "PropCity",
+						"type": "String"
+					},
+					{
+						"name": "PropState",
+						"type": "String"
+					},
+					{
+						"name": "PropZip",
+						"type": "String"
+					},
+					{
+						"name": "PropGeoCode",
+						"type": "String"
+					},
+					{
+						"name": "PropCounty",
+						"type": "String"
+					},
+					{
+						"name": "PropValType",
+						"type": "String"
+					},
+					{
+						"name": "PropertyType",
+						"type": "String"
+					},
+					{
+						"name": "CurrentOccupancy",
+						"type": "String"
+					},
+					{
+						"name": "ValuationMethod",
+						"type": "String"
+					},
+					{
+						"name": "OrigPropVal",
+						"type": "String"
+					},
+					{
+						"name": "CurrentLTV",
+						"type": "String"
+					},
+					{
+						"name": "PropValNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "LastPMIStatementDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrPMICancelRequest",
+						"type": "String"
+					},
+					{
+						"name": "PMICancelDate",
+						"type": "String"
+					},
+					{
+						"name": "PMICancelNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "PMICancelRequestDate",
+						"type": "String"
+					},
+					{
+						"name": "PMICancelResponse",
+						"type": "String"
+					},
+					{
+						"name": "PMICreditAmount",
+						"type": "String"
+					},
+					{
+						"name": "PMIFlag",
+						"type": "String"
+					},
+					{
+						"name": "PMIPmt",
+						"type": "String"
+					},
+					{
+						"name": "PMIRefundDate",
+						"type": "String"
+					},
+					{
+						"name": "LoanAmortPeriod",
+						"type": "String"
+					},
+					{
+						"name": "LastPaymentDueDate",
+						"type": "String"
+					},
+					{
+						"name": "PrincipalBalance",
+						"type": "String"
+					},
+					{
+						"name": "NotOfAcctCloseToCredAgenc",
+						"type": "String"
+					},
+					{
+						"name": "PaidOffDate",
+						"type": "String"
+					},
+					{
+						"name": "PITIAmount",
+						"type": "String"
+					},
+					{
+						"name": "PIAmount",
+						"type": "String"
+					},
+					{
+						"name": "TIAmount",
+						"type": "String"
+					},
+					{
+						"name": "PaymentCollectedMTD",
+						"type": "String"
+					},
+					{
+						"name": "PaymentCreditDate",
+						"type": "String"
+					},
+					{
+						"name": "PaymentPostDate",
+						"type": "String"
+					},
+					{
+						"name": "PaymentReceiptDate",
+						"type": "String"
+					},
+					{
+						"name": "PaymentDueDate",
+						"type": "String"
+					},
+					{
+						"name": "Paystring",
+						"type": "String"
+					},
+					{
+						"name": "BorrowerEscrowDeficiencyNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowAnalysisDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowRefundDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowBalance",
+						"type": "String"
+					},
+					{
+						"name": "EscrowMakeUpPayment",
+						"type": "String"
+					},
+					{
+						"name": "EscrowDeficiency",
+						"type": "String"
+					},
+					{
+						"name": "EscrowPaymentDueDate",
+						"type": "String"
+					},
+					{
+						"name": "EscrowShortage",
+						"type": "String"
+					},
+					{
+						"name": "EscrowSurplus",
+						"type": "String"
+					},
+					{
+						"name": "InsuranceELDDate",
+						"type": "String"
+					},
+					{
+						"name": "InsurancePaymentDate",
+						"type": "String"
+					},
+					{
+						"name": "MonthlyEscrowPmt",
+						"type": "String"
+					},
+					{
+						"name": "TaxDueDate",
+						"type": "String"
+					},
+					{
+						"name": "TaxPaymentDate",
+						"type": "String"
+					},
+					{
+						"name": "NewDelinquencyCharge",
+						"type": "String"
+					},
+					{
+						"name": "NewLateFee",
+						"type": "String"
+					},
+					{
+						"name": "LateChargeAssessedDate",
+						"type": "String"
+					},
+					{
+						"name": "LateChargeStop",
+						"type": "String"
+					},
+					{
+						"name": "ErrorNoticeAckDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrDQNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "FPInsuranceRefundDate",
+						"type": "String"
+					},
+					{
+						"name": "CreditExtendDate",
+						"type": "String"
+					},
+					{
+						"name": "RefundDate",
+						"type": "String"
+					},
+					{
+						"name": "RefundReqDate",
+						"type": "String"
+					},
+					{
+						"name": "DelinquentNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "DisputeResolution",
+						"type": "String"
+					},
+					{
+						"name": "IsARM",
+						"type": "String"
+					},
+					{
+						"name": "SubsequentInterestRateAdjustmentPeriod",
+						"type": "String"
+					},
+					{
+						"name": "ARMIndexCode",
+						"type": "String"
+					},
+					{
+						"name": "ARMOriginalPIChangeDate",
+						"type": "String"
+					},
+					{
+						"name": "NextPIAdjustDate",
+						"type": "String"
+					},
+					{
+						"name": "ARMChangeLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "IndexAvailableLeadTime",
+						"type": "String"
+					},
+					{
+						"name": "ARMOriginalPIChangeLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "BKStatus",
+						"type": "String"
+					},
+					{
+						"name": "BKChapter",
+						"type": "String"
+					},
+					{
+						"name": "BKStage",
+						"type": "String"
+					},
+					{
+						"name": "BKFlag",
+						"type": "String"
+					},
+					{
+						"name": "MFRHearingResults",
+						"type": "String"
+					},
+					{
+						"name": "CramdownHearingResults",
+						"type": "String"
+					},
+					{
+						"name": "AdversarialResults",
+						"type": "String"
+					},
+					{
+						"name": "DaysInFC",
+						"type": "String"
+					},
+					{
+						"name": "FCStage",
+						"type": "String"
+					},
+					{
+						"name": "FCLScheduledSaleDate",
+						"type": "String"
+					},
+					{
+						"name": "FCScheduledSaleDate",
+						"type": "String"
+					},
+					{
+						"name": "FCGovtFileDate",
+						"type": "String"
+					},
+					{
+						"name": "FCFlag",
+						"type": "String"
+					},
+					{
+						"name": "NY1304NoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "LiquidationType",
+						"type": "String"
+					},
+					{
+						"name": "LMStatus",
+						"type": "String"
+					},
+					{
+						"name": "BorrSCRAHardshipType",
+						"type": "String"
+					},
+					{
+						"name": "BorrSCRAHardshipDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrIntention",
+						"type": "String"
+					},
+					{
+						"name": "LMDeal",
+						"type": "String"
+					},
+					{
+						"name": "LMProgram",
+						"type": "String"
+					},
+					{
+						"name": "LMDecision",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppAckDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppealDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppealDecisionLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppealRespDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppeal",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAppStatus",
+						"type": "String"
+					},
+					{
+						"name": "LossMitAssignmentDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOfferDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOptDecisionDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOptionsExtensionLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOptionsLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitPendingDocsNoticeDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOptExtLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "LossMitOptionDecisionDate",
+						"type": "String"
+					},
+					{
+						"name": "DenialReason",
+						"type": "String"
+					},
+					{
+						"name": "Borr1stCallDate",
+						"type": "String"
+					},
+					{
+						"name": "ForbearanceStatus",
+						"type": "String"
+					},
+					{
+						"name": "ForbearanceType",
+						"type": "String"
+					},
+					{
+						"name": "TrialStatus",
+						"type": "String"
+					},
+					{
+						"name": "RepaymentType",
+						"type": "String"
+					},
+					{
+						"name": "RepaymentStatus",
+						"type": "String"
+					},
+					{
+						"name": "NODLetterDate",
+						"type": "String"
+					},
+					{
+						"name": "BorrRespToAppealRespDate",
+						"type": "String"
+					},
+					{
+						"name": "REOStatus",
+						"type": "String"
+					},
+					{
+						"name": "REOHoldReason",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Mesh_data')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AmazonS31",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AmazonS3Location",
+						"bucketName": "snowflake-nav-bucket-1",
+						"folderPath": "pipeline",
+						"fileName": "mesh_100_loan_0811_without_header.csv"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AmazonS31')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Snow_Table_with_parameter')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Snowflake3",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"dbname": {
+							"value": "@dataset().dbNamefromDataset",
+							"type": "Expression"
+						},
+						"warehouse": "COMPUTE_WH"
+					}
+				},
+				"parameters": {
+					"table_name": {
+						"type": "string"
+					},
+					"dbNamefromDataset": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "SnowflakeTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "TRIAL_SCHEMA",
+					"table": {
+						"value": "@dataset().table_name",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Snowflake3')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SnowflakeTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Snowflake2",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SnowflakeTable",
+				"schema": [
+					{
+						"name": "LOANID",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "DATAASOF",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "INVESTORID",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "INVESTORNAME",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "BOARDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LIENPOSITION",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOANTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOANPRODUCT",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOANPURPOSE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LASTSTATEMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ORIGINALNOTEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FEMAAFFECT",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "COURTESYPERIOD",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ISATTORNEY",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ANNUALESCROWACCOUNTSTATEMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWACCOUNTCOMPUTATIONDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWCANCELDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ISESCROWED",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWCANCELNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "EVIDENCEOFINSDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "INITIALESCROWSTATEMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ORIGINALESCROWNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRESCROWCANCELREQDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "MBADQ",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOANSCHEDFORSALE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ADVERSECREDITBORRNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ADVERSECREDITREPORTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRERRORDOCREQDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRERRORNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRERRORNOTICEONPAYOFF",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRINFOREQDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRNOTICEERRORDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ERRORRESEXTENSION",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ERRORRESDOCDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ERRORRESLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "INFOREQRESPONSEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "NOTICEACKLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYOFFDELIVERYDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYOFFREQUESTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FORCEPLACEDINS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "FORCEPLACEDINSFEEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FORCEPLACEDINSNOTICE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FORCEPLACEDINSREMINDER",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FPINSURANCECANCELDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "TRANSFER404NOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "GOODBYELETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "SERVICERELEASEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "SERVICERELEASESCHEDULEDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "WELCOMELETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "WARNINGSTATUS",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "DELINQSTATATBOARDING",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "DOCUMENTATIONTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LEGALSTATUS",
+						"type": "VARCHAR",
+						"precision": 20,
+						"scale": 0
+					},
+					{
+						"name": "PREPAYMENTPENALTYFEE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "INTERESTMETHOD",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOANAPR",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "ADDITIONALDISPUTEINFODATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "SPOCASSGNDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "SCRASTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "SCRASTATUSRUNDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRSCRANOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "EFTSCHDNOTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ETFSCHEDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRFIRSTNAME",
+						"type": "VARCHAR",
+						"precision": 100,
+						"scale": 0
+					},
+					{
+						"name": "BORRLASTNAME",
+						"type": "VARCHAR",
+						"precision": 20,
+						"scale": 0
+					},
+					{
+						"name": "MAILINGSTATE",
+						"type": "VARCHAR",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "BORRCURRFICO",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ORIGBORRFICO",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "PROPADDRESS1",
+						"type": "VARCHAR",
+						"precision": 100,
+						"scale": 0
+					},
+					{
+						"name": "PROPADDRESS2",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "PROPCITY",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "PROPSTATE",
+						"type": "VARCHAR",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PROPZIP",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "PROPGEOCODE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "PROPCOUNTY",
+						"type": "VARCHAR",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PROPVALTYPE",
+						"type": "VARCHAR",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PROPERTYTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "CURRENTOCCUPANCY",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "VALUATIONMETHOD",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ORIGPROPVAL",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "CURRENTLTV",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "PROPVALNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LASTPMISTATEMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRPMICANCELREQUEST",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PMICANCELDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PMICANCELNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PMICANCELREQUESTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PMICANCELRESPONSE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PMICREDITAMOUNT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "PMIFLAG",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "PMIPMT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "PMIREFUNDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOANAMORTPERIOD",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LASTPAYMENTDUEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PRINCIPALBALANCE",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "NOTOFACCTCLOSETOCREDAGENC",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAIDOFFDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PITIAMOUNT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "PIAMOUNT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "TIAMOUNT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "PAYMENTCOLLECTEDMTD",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "PAYMENTCREDITDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYMENTPOSTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYMENTRECEIPTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYMENTDUEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "PAYSTRING",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BORROWERESCROWDEFICIENCYNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWANALYSISDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWREFUNDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWBALANCE",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWMAKEUPPAYMENT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWDEFICIENCY",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWPAYMENTDUEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWSHORTAGE",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "ESCROWSURPLUS",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "INSURANCEELDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "INSURANCEPAYMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "MONTHLYESCROWPMT",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "TAXDUEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "TAXPAYMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "NEWDELINQUENCYCHARGE",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "NEWLATEFEE",
+						"type": "FLOAT",
+						"precision": 15,
+						"scale": 0
+					},
+					{
+						"name": "LATECHARGEASSESSEDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LATECHARGESTOP",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ERRORNOTICEACKDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRDQNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FPINSURANCEREFUNDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "CREDITEXTENDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "REFUNDDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "REFUNDREQDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "DELINQUENTNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "DISPUTERESOLUTION",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "ISARM",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "SUBSEQUENTINTERESTRATEADJUSTMENTPERIOD",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "ARMINDEXCODE",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "ARMORIGINALPICHANGEDATE",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "NEXTPIADJUSTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "ARMCHANGELETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "INDEXAVAILABLELEADTIME",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "ARMORIGINALPICHANGELETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BKSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BKCHAPTER",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BKSTAGE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BKFLAG",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "MFRHEARINGRESULTS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "CRAMDOWNHEARINGRESULTS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "ADVERSARIALRESULTS",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "DAYSINFC",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "FCSTAGE",
+						"type": "VARCHAR",
+						"precision": 20,
+						"scale": 0
+					},
+					{
+						"name": "FCLSCHEDULEDSALEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FCSCHEDULEDSALEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FCGOVTFILEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FCFLAG",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "NY1304NOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LIQUIDATIONTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LMSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BORRSCRAHARDSHIPTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BORRSCRAHARDSHIPDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRINTENTION",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					},
+					{
+						"name": "LMDEAL",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LMPROGRAM",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LMDECISION",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPACKDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPEALDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPEALDECISIONLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPEALRESPDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPEAL",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITAPPSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITASSIGNMENTDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOFFERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOPTDECISIONDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOPTIONSEXTENSIONLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOPTIONSLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITPENDINGDOCSNOTICEDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOPTEXTLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LOSSMITOPTIONDECISIONDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "DENIALREASON",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "BORR1STCALLDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "FORBEARANCESTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "FORBEARANCETYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "TRIALSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "REPAYMENTTYPE",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "REPAYMENTSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "NODLETTERDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "BORRRESPTOAPPEALRESPDATE",
+						"type": "DATE",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "REOSTATUS",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "REOHOLDREASON",
+						"type": "VARCHAR",
+						"precision": 30,
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "TRIAL_SCHEMA",
+					"table": "MESH_DATA_AUTO"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Snowflake2')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/empdeptdataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "*.csv",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/invalidrecord')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "invalid.csv",
+						"folderPath": "invalidrecord",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/valid_data')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "validrecord.csv",
+						"folderPath": "valid_emp_record",
+						"container": "snowflake-migration"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		}
+	]
+}

@@ -1,0 +1,30 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "LA-Ankit-ADF1"
+		},
+		"AmazonS31_secretAccessKey": {
+			"value": ""
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStoragedynamic_connectionString": {
+			"value": ""
+		},
+		"Snowflake2_connectionString": {
+			"value": ""
+		},
+		"Snowflake3_connectionString": {
+			"value": ""
+		},
+		"AmazonS31_properties_typeProperties_accessKeyId": {
+			"value": "AKIAVY7O7CXVMYE3BYBV"
+		},
+		"EventTrigger_properties_typeProperties_scope": {
+			"value": "/subscriptions/586f6c5b-608d-4cd5-8b0c-7f9bc50cb3d3/resourceGroups/LearningAzure/providers/Microsoft.Storage/storageAccounts/47dastorage"
+		}
+	}
+}
