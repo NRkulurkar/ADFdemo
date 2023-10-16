@@ -1,0 +1,778 @@
+{
+	"name": "Mesh100k_data",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorage1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "mesh_100k_loan_0713c_1689255555881.csv",
+				"container": "snowflake-migration"
+			},
+			"columnDelimiter": ",",
+			"rowDelimiter": "\n",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "LoanID",
+				"type": "String"
+			},
+			{
+				"name": "DataAsOf",
+				"type": "String"
+			},
+			{
+				"name": "InvestorID",
+				"type": "String"
+			},
+			{
+				"name": "InvestorName",
+				"type": "String"
+			},
+			{
+				"name": "BoardDate",
+				"type": "String"
+			},
+			{
+				"name": "LienPosition",
+				"type": "String"
+			},
+			{
+				"name": "LoanType",
+				"type": "String"
+			},
+			{
+				"name": "LoanProduct",
+				"type": "String"
+			},
+			{
+				"name": "LoanPurpose",
+				"type": "String"
+			},
+			{
+				"name": "LastStatementDate",
+				"type": "String"
+			},
+			{
+				"name": "OriginalNoteDate",
+				"type": "String"
+			},
+			{
+				"name": "FEMAaffect",
+				"type": "String"
+			},
+			{
+				"name": "CourtesyPeriod",
+				"type": "String"
+			},
+			{
+				"name": "IsAttorney",
+				"type": "String"
+			},
+			{
+				"name": "AnnualEscrowAccountStatementDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowAccountComputationDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowCancelDate",
+				"type": "String"
+			},
+			{
+				"name": "IsEscrowed",
+				"type": "String"
+			},
+			{
+				"name": "EscrowCancelNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "EvidenceOfInsDate",
+				"type": "String"
+			},
+			{
+				"name": "InitialEscrowStatementDate",
+				"type": "String"
+			},
+			{
+				"name": "OriginalEscrowNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrEscrowCancelReqDate",
+				"type": "String"
+			},
+			{
+				"name": "MBADQ",
+				"type": "String"
+			},
+			{
+				"name": "LoanSchedForSale",
+				"type": "String"
+			},
+			{
+				"name": "AdverseCreditBorrNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "AdverseCreditReportDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrErrorDocReqDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrErrorNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrErrorNoticeOnPayoff",
+				"type": "String"
+			},
+			{
+				"name": "BorrInfoReqDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrNoticeErrorDate",
+				"type": "String"
+			},
+			{
+				"name": "ErrorResExtension",
+				"type": "String"
+			},
+			{
+				"name": "ErrorResDocDate",
+				"type": "String"
+			},
+			{
+				"name": "ErrorResLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "InfoReqResponseDate",
+				"type": "String"
+			},
+			{
+				"name": "NoticeAckLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "PayoffDeliveryDate",
+				"type": "String"
+			},
+			{
+				"name": "PayoffRequestDate",
+				"type": "String"
+			},
+			{
+				"name": "ForcePlacedIns",
+				"type": "String"
+			},
+			{
+				"name": "ForcePlacedInsFeeDate",
+				"type": "String"
+			},
+			{
+				"name": "ForcePlacedInsNotice",
+				"type": "String"
+			},
+			{
+				"name": "ForcePlacedInsReminder",
+				"type": "String"
+			},
+			{
+				"name": "FPInsuranceCancelDate",
+				"type": "String"
+			},
+			{
+				"name": "Transfer404noticedate",
+				"type": "String"
+			},
+			{
+				"name": "GoodbyeLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "ServiceReleaseDate",
+				"type": "String"
+			},
+			{
+				"name": "ServiceReleaseScheduledDate",
+				"type": "String"
+			},
+			{
+				"name": "WelcomeLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "WarningStatus",
+				"type": "String"
+			},
+			{
+				"name": "DelinqStatAtBoarding",
+				"type": "String"
+			},
+			{
+				"name": "DocumentationType",
+				"type": "String"
+			},
+			{
+				"name": "LegalStatus",
+				"type": "String"
+			},
+			{
+				"name": "PrepaymentPenaltyFee",
+				"type": "String"
+			},
+			{
+				"name": "InterestMethod",
+				"type": "String"
+			},
+			{
+				"name": "LoanAPR",
+				"type": "String"
+			},
+			{
+				"name": "AdditionalDisputeInfoDate",
+				"type": "String"
+			},
+			{
+				"name": "SPOCAssgnDate",
+				"type": "String"
+			},
+			{
+				"name": "SCRAStatus",
+				"type": "String"
+			},
+			{
+				"name": "SCRAStatusRunDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrSCRANoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "EFTSchdNotDate",
+				"type": "String"
+			},
+			{
+				"name": "ETFSchedDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrFirstName",
+				"type": "String"
+			},
+			{
+				"name": "BorrLastName",
+				"type": "String"
+			},
+			{
+				"name": "MailingState",
+				"type": "String"
+			},
+			{
+				"name": "BorrCurrFICO",
+				"type": "String"
+			},
+			{
+				"name": "OrigBorrFICO",
+				"type": "String"
+			},
+			{
+				"name": "PropAddress1",
+				"type": "String"
+			},
+			{
+				"name": "PropAddress2",
+				"type": "String"
+			},
+			{
+				"name": "PropCity",
+				"type": "String"
+			},
+			{
+				"name": "PropState",
+				"type": "String"
+			},
+			{
+				"name": "PropZip",
+				"type": "String"
+			},
+			{
+				"name": "PropGeoCode",
+				"type": "String"
+			},
+			{
+				"name": "PropCounty",
+				"type": "String"
+			},
+			{
+				"name": "PropValType",
+				"type": "String"
+			},
+			{
+				"name": "PropertyType",
+				"type": "String"
+			},
+			{
+				"name": "CurrentOccupancy",
+				"type": "String"
+			},
+			{
+				"name": "ValuationMethod",
+				"type": "String"
+			},
+			{
+				"name": "OrigPropVal",
+				"type": "String"
+			},
+			{
+				"name": "CurrentLTV",
+				"type": "String"
+			},
+			{
+				"name": "PropValNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "LastPMIStatementDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrPMICancelRequest",
+				"type": "String"
+			},
+			{
+				"name": "PMICancelDate",
+				"type": "String"
+			},
+			{
+				"name": "PMICancelNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "PMICancelRequestDate",
+				"type": "String"
+			},
+			{
+				"name": "PMICancelResponse",
+				"type": "String"
+			},
+			{
+				"name": "PMICreditAmount",
+				"type": "String"
+			},
+			{
+				"name": "PMIFlag",
+				"type": "String"
+			},
+			{
+				"name": "PMIPmt",
+				"type": "String"
+			},
+			{
+				"name": "PMIRefundDate",
+				"type": "String"
+			},
+			{
+				"name": "LoanAmortPeriod",
+				"type": "String"
+			},
+			{
+				"name": "LastPaymentDueDate",
+				"type": "String"
+			},
+			{
+				"name": "PrincipalBalance",
+				"type": "String"
+			},
+			{
+				"name": "NotOfAcctCloseToCredAgenc",
+				"type": "String"
+			},
+			{
+				"name": "PaidOffDate",
+				"type": "String"
+			},
+			{
+				"name": "PITIAmount",
+				"type": "String"
+			},
+			{
+				"name": "PIAmount",
+				"type": "String"
+			},
+			{
+				"name": "TIAmount",
+				"type": "String"
+			},
+			{
+				"name": "PaymentCollectedMTD",
+				"type": "String"
+			},
+			{
+				"name": "PaymentCreditDate",
+				"type": "String"
+			},
+			{
+				"name": "PaymentPostDate",
+				"type": "String"
+			},
+			{
+				"name": "PaymentReceiptDate",
+				"type": "String"
+			},
+			{
+				"name": "PaymentDueDate",
+				"type": "String"
+			},
+			{
+				"name": "Paystring",
+				"type": "String"
+			},
+			{
+				"name": "BorrowerEscrowDeficiencyNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowAnalysisDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowRefundDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowBalance",
+				"type": "String"
+			},
+			{
+				"name": "EscrowMakeUpPayment",
+				"type": "String"
+			},
+			{
+				"name": "EscrowDeficiency",
+				"type": "String"
+			},
+			{
+				"name": "EscrowPaymentDueDate",
+				"type": "String"
+			},
+			{
+				"name": "EscrowShortage",
+				"type": "String"
+			},
+			{
+				"name": "EscrowSurplus",
+				"type": "String"
+			},
+			{
+				"name": "InsuranceELDDate",
+				"type": "String"
+			},
+			{
+				"name": "InsurancePaymentDate",
+				"type": "String"
+			},
+			{
+				"name": "MonthlyEscrowPmt",
+				"type": "String"
+			},
+			{
+				"name": "TaxDueDate",
+				"type": "String"
+			},
+			{
+				"name": "TaxPaymentDate",
+				"type": "String"
+			},
+			{
+				"name": "NewDelinquencyCharge",
+				"type": "String"
+			},
+			{
+				"name": "NewLateFee",
+				"type": "String"
+			},
+			{
+				"name": "LateChargeAssessedDate",
+				"type": "String"
+			},
+			{
+				"name": "LateChargeStop",
+				"type": "String"
+			},
+			{
+				"name": "ErrorNoticeAckDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrDQNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "FPInsuranceRefundDate",
+				"type": "String"
+			},
+			{
+				"name": "CreditExtendDate",
+				"type": "String"
+			},
+			{
+				"name": "RefundDate",
+				"type": "String"
+			},
+			{
+				"name": "RefundReqDate",
+				"type": "String"
+			},
+			{
+				"name": "DelinquentNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "DisputeResolution",
+				"type": "String"
+			},
+			{
+				"name": "IsARM",
+				"type": "String"
+			},
+			{
+				"name": "SubsequentInterestRateAdjustmentPeriod",
+				"type": "String"
+			},
+			{
+				"name": "ARMIndexCode",
+				"type": "String"
+			},
+			{
+				"name": "ARMOriginalPIChangeDate",
+				"type": "String"
+			},
+			{
+				"name": "NextPIAdjustDate",
+				"type": "String"
+			},
+			{
+				"name": "ARMChangeLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "IndexAvailableLeadTime",
+				"type": "String"
+			},
+			{
+				"name": "ARMOriginalPIChangeLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "BKStatus",
+				"type": "String"
+			},
+			{
+				"name": "BKChapter",
+				"type": "String"
+			},
+			{
+				"name": "BKStage",
+				"type": "String"
+			},
+			{
+				"name": "BKFlag",
+				"type": "String"
+			},
+			{
+				"name": "MFRHearingResults",
+				"type": "String"
+			},
+			{
+				"name": "CramdownHearingResults",
+				"type": "String"
+			},
+			{
+				"name": "AdversarialResults",
+				"type": "String"
+			},
+			{
+				"name": "DaysInFC",
+				"type": "String"
+			},
+			{
+				"name": "FCStage",
+				"type": "String"
+			},
+			{
+				"name": "FCLScheduledSaleDate",
+				"type": "String"
+			},
+			{
+				"name": "FCScheduledSaleDate",
+				"type": "String"
+			},
+			{
+				"name": "FCGovtFileDate",
+				"type": "String"
+			},
+			{
+				"name": "FCFlag",
+				"type": "String"
+			},
+			{
+				"name": "NY1304NoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "LiquidationType",
+				"type": "String"
+			},
+			{
+				"name": "LMStatus",
+				"type": "String"
+			},
+			{
+				"name": "BorrSCRAHardshipType",
+				"type": "String"
+			},
+			{
+				"name": "BorrSCRAHardshipDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrIntention",
+				"type": "String"
+			},
+			{
+				"name": "LMDeal",
+				"type": "String"
+			},
+			{
+				"name": "LMProgram",
+				"type": "String"
+			},
+			{
+				"name": "LMDecision",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppAckDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppealDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppealDecisionLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppealRespDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppeal",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAppStatus",
+				"type": "String"
+			},
+			{
+				"name": "LossMitAssignmentDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOfferDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOptDecisionDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOptionsExtensionLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOptionsLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitPendingDocsNoticeDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOptExtLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "LossMitOptionDecisionDate",
+				"type": "String"
+			},
+			{
+				"name": "DenialReason",
+				"type": "String"
+			},
+			{
+				"name": "Borr1stCallDate",
+				"type": "String"
+			},
+			{
+				"name": "ForbearanceStatus",
+				"type": "String"
+			},
+			{
+				"name": "ForbearanceType",
+				"type": "String"
+			},
+			{
+				"name": "TrialStatus",
+				"type": "String"
+			},
+			{
+				"name": "RepaymentType",
+				"type": "String"
+			},
+			{
+				"name": "RepaymentStatus",
+				"type": "String"
+			},
+			{
+				"name": "NODLetterDate",
+				"type": "String"
+			},
+			{
+				"name": "BorrRespToAppealRespDate",
+				"type": "String"
+			},
+			{
+				"name": "REOStatus",
+				"type": "String"
+			},
+			{
+				"name": "REOHoldReason",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

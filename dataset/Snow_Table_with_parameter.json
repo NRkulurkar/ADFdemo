@@ -1,0 +1,35 @@
+{
+	"name": "Snow_Table_with_parameter",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Snowflake3",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"dbname": {
+					"value": "@dataset().dbNamefromDataset",
+					"type": "Expression"
+				},
+				"warehouse": "COMPUTE_WH"
+			}
+		},
+		"parameters": {
+			"table_name": {
+				"type": "string"
+			},
+			"dbNamefromDataset": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SnowflakeTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "TRIAL_SCHEMA",
+			"table": {
+				"value": "@dataset().table_name",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

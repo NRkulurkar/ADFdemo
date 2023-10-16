@@ -1,0 +1,164 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empdeptdataset",
+						"type": "DatasetReference"
+					},
+					"name": "Empdata"
+				},
+				{
+					"dataset": {
+						"referenceName": "empdeptdataset",
+						"type": "DatasetReference"
+					},
+					"name": "Department"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "AzureBlobStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "joinOnDeptId"
+				},
+				{
+					"name": "filter1"
+				},
+				{
+					"name": "sort1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "pivot1"
+				},
+				{
+					"name": "unpivot1"
+				},
+				{
+					"name": "surrogateKey1"
+				},
+				{
+					"name": "window1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "alterRow1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as integer,",
+				"          FirstName as string,",
+				"          LastName as string,",
+				"          Email as string,",
+				"          DepartmentID as integer,",
+				"          DateOfHire as date,",
+				"          Salary as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['*emp.csv']) ~> Empdata",
+				"source(output(",
+				"          DepartmentID as integer,",
+				"          DepartmentName as string,",
+				"          Location as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['*dept.csv']) ~> Department",
+				"Empdata, Department join(Empdata@DepartmentID == Department@DepartmentID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinOnDeptId",
+				"derivedColumn1 filter(Salary>60000) ~> filter1",
+				"filter1 sort(asc(EmployeeID, true)) ~> sort1",
+				"joinOnDeptId derive(Location = iif(Location == \"New York\",\"NY\",Location)) ~> derivedColumn1",
+				"joinOnDeptId select(mapColumn(",
+				"          EmployeeID,",
+				"          FirstName,",
+				"          LastName,",
+				"          Email,",
+				"          DateOfHire,",
+				"          Salary,",
+				"          DepartmentID = Department@DepartmentID,",
+				"          DepartmentName,",
+				"          Location",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 pivot(groupBy(DepartmentID),",
+				"     pivotBy(DepartmentName),",
+				"     no_emp = count(EmployeeID),",
+				"     columnNaming: '$N$V',",
+				"     lateral: true) ~> pivot1",
+				"Department unpivot(output(",
+				"          test as string,",
+				"          DepartmentName as string",
+				"     ),",
+				"     ungroupBy(DepartmentID),",
+				"     lateral: true,",
+				"     ignoreNullPivots: false) ~> unpivot1",
+				"unpivot1 keyGenerate(output(emp_id as long),",
+				"     startAt: 1L,",
+				"     stepValue: 1L) ~> surrogateKey1",
+				"joinOnDeptId window(over(DepartmentName),",
+				"     desc(Salary, true),",
+				"     rank = denseRank()) ~> window1",
+				"window1 select(mapColumn(",
+				"          DepartmentName,",
+				"          rank,",
+				"          Salary",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"surrogateKey1 alterRow(deleteIf(DepartmentName=='IT')) ~> alterRow1",
+				"sort1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delimited',",
+				"     container: 'snowflake-migration',",
+				"     folderPath: 'output',",
+				"     rowDelimiter: '\\n',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: false,",
+				"     partitionFileNames:['dataflow.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     mapColumn(",
+				"          EmployeeID,",
+				"          FirstName,",
+				"          LastName,",
+				"          Email,",
+				"          DepartmentID = Empdata@DepartmentID,",
+				"          DateOfHire,",
+				"          Salary,",
+				"          DepartmentName,",
+				"          Location",
+				"     ),",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}
