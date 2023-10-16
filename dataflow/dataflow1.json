@@ -58,9 +58,6 @@
 				},
 				{
 					"name": "select2"
-				},
-				{
-					"name": "alterRow1"
 				}
 			],
 			"scriptLines": [
@@ -132,7 +129,6 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> select2",
-				"surrogateKey1 alterRow(deleteIf(DepartmentName=='IT')) ~> alterRow1",
 				"sort1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'delimited',",
