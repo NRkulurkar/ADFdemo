@@ -1,0 +1,40 @@
+{
+	"name": "dataflow2",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empdeptdataset",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "split1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          EmployeeID as short,",
+				"          FirstNameLastName as string,",
+				"          Email as string,",
+				"          DepartmentID as short,",
+				"          DateOfHire as string,",
+				"          Salary as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     inferDriftedColumnTypes: true,",
+				"     ignoreNoFilesFound: false,",
+				"     wildcardPaths:['*emp.csv']) ~> source1",
+				"source1 split(isNull(toDate(DateOfHire,'yyyy-mm-dd')),",
+				"     disjoint: false) ~> split1@(invalidDate, validDate)"
+			]
+		}
+	}
+}
