@@ -22,10 +22,6 @@
 					"value": "@dataset().filename",
 					"type": "Expression"
 				},
-				"folderPath": {
-					"value": "@dataset().folder",
-					"type": "Expression"
-				},
 				"container": "snowflake-migration"
 			},
 			"columnDelimiter": ",",
