@@ -6,10 +6,10 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "Emp_dataset",
+						"referenceName": "Dummy",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "dummy"
 				}
 			],
 			"sinks": [
@@ -24,6 +24,9 @@
 			"transformations": [
 				{
 					"name": "derivedColumn1"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -36,22 +39,26 @@
 				"     logFileName as string",
 				"}",
 				"source(output(",
-				"          id as string,",
-				"          first_name as string,",
-				"          last_name as string,",
-				"          email as string,",
-				"          location as string,",
-				"          {department\\r} as string",
+				"          dummy as string",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 derive(ADFName = $ADFName,",
+				"     ignoreNoFilesFound: false) ~> dummy",
+				"dummy derive(ADFName = $ADFName,",
 				"          PipelineName = $PipelineName,",
 				"          Status = $Status,",
 				"          RunId = $RunId,",
 				"          TriggerName = $TriggerName) ~> derivedColumn1",
-				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"derivedColumn1 select(mapColumn(",
+				"          ADFName,",
+				"          PipelineName,",
+				"          Status,",
+				"          RunId,",
+				"          TriggerName",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:[($logFileName)],",
 				"     skipDuplicateMapInputs: true,",
