@@ -19,6 +19,7 @@
 					"value": "@dataset().filename",
 					"type": "Expression"
 				},
+				"folderPath": "output",
 				"container": "snowflake-migration"
 			},
 			"columnDelimiter": ",",
